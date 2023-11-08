@@ -1,0 +1,110 @@
+version: "3"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django_RD
+    env_file:
+      - .env
+    environment:
+      - TZ=Europe/Minsk
+    ports:
+      - 8000:8000
+    depends_on:
+      - rd_db
+    volumes:
+      - ./:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    networks:
+      - RD-app-network
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "poetry run python manage.py makemigrations && poetry run python manage.py migrate && poetry run python manage.py filltestdata"
+    depends_on:
+      - rd_db
+      - web
+    networks:
+      - RD-app-network
+  rd_db:
+    container_name: postgres_RD
+    image: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - RD-app-network
+    env_file:
+      - .env
+    environment:
+      - TZ=Europe/Minsk
+  redis:
+    container_name: redis_RD
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - RD-app-network
+    environment:
+      - TZ=Europe/Minsk
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [ 'celery', '-A', 'app', 'worker', '-l', 'info' ]
+    environment:
+      - BROKER_URL=redis://redis:6379
+      - RESULT_BACKEND=redis://redis:6379
+      - TZ=Europe/Minsk
+    container_name: worker_RD
+    working_dir: /app
+    volumes:
+      - ./:/app
+    depends_on:
+      - rd_db
+      - redis
+    networks:
+      - RD-app-network
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: [ 'celery', '-A', 'app', 'beat', '-l', 'info' ]
+    environment:
+      - BROKER_URL=redis://redis:6379
+      - TZ=Europe/Minsk
+    container_name: beat_RD
+    volumes:
+      - ./:/app
+    depends_on:
+      - rd_db
+      - redis
+    networks:
+      - RD-app-network
+
+  flower:
+    image: mher/flower:0.9.7
+    container_name: flower_RD
+    command: ['flower', '--broker=redis://redis:6379']
+    ports:
+      - 5555:5555
+    depends_on:
+      - redis
+    networks:
+      - RD-app-network
+    environment:
+      - TZ=Europe/Minsk
+
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+networks:
+  RD-app-network:

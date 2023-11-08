@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Page</title>
+    <style>
+
+        .frame {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: rgb(253, 154, 64);
+            background: linear-gradient(135deg, rgb(253, 154, 64), rgb(92, 110, 243), rgb(252, 59, 91));
+        }
+        .register {
+            width: 400px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .register h2 {
+            text-align: center;
+            color: #fa9845;
+        }
+        .register button {
+            margin-top: 10px;
+            background-color: rgb(252, 59, 91);
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+        ::placeholder {
+            color: rgba(92, 110, 243, 0.5);
+        }
+        .register .helptext,  ul li {
+            color: rgba(92, 110, 243, 0.5);
+            font-style: italic;
+            font-size: 12px;
+            display: block;
+        }
+        ul.errorlist li {
+            color: red;
+        }
+
+    </style>
+    {% load static %}
+    <script src="{% static 'js/copy_email.js' %}"></script>
+</head>
+<body>
+    <div class="frame">
+        <div class="register">
+            <h2>Employee Registration</h2>
+            <form method="post" action="{% url 'register' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                {% if error_message %}
+                    <p class="error">{{ error_message }}</p>
+                {% endif %}
+                <button type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

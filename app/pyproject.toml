@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "rd-test"
+version = "0.1.0"
+description = ""
+authors = ["Denis Nechay-Nitsevich <denisnechay@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+django = ">=3.1,<4.0"
+djangorestframework = ">=3.12,<4.0"
+celery = "5.0.5"
+psycopg2-binary = ">=2.8,<3.0"
+django-filter = ">=2.4,<3.0"
+gunicorn = "^21.2.0"
+python-dotenv = "^1.0.0"
+django-mptt = "0.14.0"
+faker = "^19.13.0"
+redis = "^5.0.1"
+qrcode = {extras = ["pil"], version = "^7.4.2"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
